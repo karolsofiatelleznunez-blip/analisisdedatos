@@ -38,7 +38,7 @@ raw_data <- read.csv("R Raw Data.csv", stringsAsFactors = FALSE, skip = 1, check
 
 data <- raw_data %>%
   transmute(
-    weeks_at_euthanasia = as.numeric(sub(",", ".", `Tiempo (sem)`, fixed = TRUE)),
+    tiempo_sem = suppressWarnings(as.numeric(sub(",", ".", `Tiempo (sem)`, fixed = TRUE))),
     reached_terminal = ifelse(trimws(as.character(`¿Llegó a término?`)) == "1", "Yes", "No"),
     sex = case_when(
       tolower(trimws(Sexo)) == "macho"  ~ "M",
@@ -51,6 +51,10 @@ data <- raw_data %>%
     reached_terminal = factor(reached_terminal, levels = c("Yes", "No"))
   )
 
+if (any(is.na(data$tiempo_sem) & nzchar(trimws(as.character(raw_data$`Tiempo (sem)`))))) {
+  warning("Some rows in `Tiempo (sem)` could not be parsed as numeric values.")
+}
+
 kable(head(data), caption = "First rows of the dataset")
 ```
 
@@ -60,11 +64,11 @@ kable(head(data), caption = "First rows of the dataset")
 
 ```{r age-summary}
 cat("Summary of Tiempo (sem):\n")
-summary(data$weeks_at_euthanasia)
+summary(data$tiempo_sem)
 ```
 
 ```{r age-plot}
-ggplot(data, aes(x = factor(weeks_at_euthanasia))) +
+ggplot(data, aes(x = factor(tiempo_sem))) +
   geom_bar(fill = "steelblue", color = "white") +
   labs(
     title = "Distribution of Tiempo (sem)",
@@ -98,20 +102,20 @@ ggplot(data, aes(x = sex, fill = sex)) +
 
 ---
 
-## 4. Weeks at Euthanasia
+## 4. Tiempo (sem) by Sex
 
 ```{r euthanasia-summary}
-cat("Summary of Weeks at Euthanasia:\n")
-summary(data$weeks_at_euthanasia)
+cat("Summary of Tiempo (sem):\n")
+summary(data$tiempo_sem)
 ```
 
 ```{r euthanasia-plot}
-ggplot(data, aes(x = weeks_at_euthanasia, fill = sex)) +
+ggplot(data, aes(x = tiempo_sem, fill = sex)) +
   geom_histogram(binwidth = 2, color = "white", position = "dodge") +
   scale_fill_manual(values = c("Male" = "#4E79A7", "Female" = "#F28E2B")) +
   labs(
-    title = "Distribution of Age at Euthanasia by Sex",
-    x     = "Weeks at Euthanasia",
+    title = "Distribution of Tiempo (sem) by Sex",
+    x     = "Tiempo (sem)",
     y     = "Count",
     fill  = "Sex"
   ) +
@@ -119,13 +123,13 @@ ggplot(data, aes(x = weeks_at_euthanasia, fill = sex)) +
 ```
 
 ```{r euthanasia-boxplot}
-ggplot(data, aes(x = sex, y = weeks_at_euthanasia, fill = sex)) +
+ggplot(data, aes(x = sex, y = tiempo_sem, fill = sex)) +
   geom_boxplot(show.legend = FALSE, outlier.shape = 21) +
   scale_fill_manual(values = c("Male" = "#4E79A7", "Female" = "#F28E2B")) +
   labs(
-    title = "Age at Euthanasia by Sex",
+    title = "Tiempo (sem) by Sex",
     x     = "Sex",
-    y     = "Weeks at Euthanasia"
+    y     = "Tiempo (sem)"
   ) +
   theme_minimal()
 ```
@@ -185,32 +189,32 @@ ggplot(data, aes(x = sex, fill = reached_terminal)) +
   theme_minimal()
 ```
 
-### Weeks at euthanasia by terminal endpoint
+### Tiempo (sem) by terminal endpoint
 
 ```{r euthanasia-by-terminal}
 data %>%
   group_by(reached_terminal) %>%
   summarise(
     n        = n(),
-    mean_wks = round(mean(weeks_at_euthanasia), 1),
-    sd_wks   = round(sd(weeks_at_euthanasia), 1),
-    min_wks  = min(weeks_at_euthanasia),
-    max_wks  = max(weeks_at_euthanasia)
+    mean_wks = round(mean(tiempo_sem), 1),
+    sd_wks   = round(sd(tiempo_sem), 1),
+    min_wks  = min(tiempo_sem),
+    max_wks  = max(tiempo_sem)
   ) %>%
   kable(
     col.names = c("Reached Terminal", "N", "Mean Weeks", "SD", "Min", "Max"),
-    caption   = "Weeks at euthanasia by terminal endpoint"
+    caption   = "Tiempo (sem) by terminal endpoint"
   )
 ```
 
 ```{r euthanasia-terminal-boxplot}
-ggplot(data, aes(x = reached_terminal, y = weeks_at_euthanasia, fill = reached_terminal)) +
+ggplot(data, aes(x = reached_terminal, y = tiempo_sem, fill = reached_terminal)) +
   geom_boxplot(show.legend = FALSE, outlier.shape = 21) +
   scale_fill_manual(values = c("Yes" = "#E15759", "No" = "#76B7B2")) +
   labs(
-    title = "Weeks at Euthanasia by Terminal Endpoint",
+    title = "Tiempo (sem) by Terminal Endpoint",
     x     = "Reached Terminal",
-    y     = "Weeks at Euthanasia"
+    y     = "Tiempo (sem)"
   ) +
   theme_minimal()
 ```
@@ -219,10 +223,10 @@ ggplot(data, aes(x = reached_terminal, y = weeks_at_euthanasia, fill = reached_t
 
 ## 7. Statistical Tests
 
-### Difference in weeks at euthanasia: terminal vs. non-terminal
+### Difference in tiempo (sem): terminal vs. non-terminal
 
 ```{r t-test}
-t_result <- t.test(weeks_at_euthanasia ~ reached_terminal, data = data)
+t_result <- t.test(tiempo_sem ~ reached_terminal, data = data)
 cat(sprintf(
   "Welch two-sample t-test\n  t = %.3f, df = %.1f, p-value = %.4f\n",
   t_result$statistic, t_result$parameter, t_result$p.value
