@@ -1,0 +1,238 @@
+---
+title: "Research Variables Analysis"
+author: ""
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+## Overview
+
+This document analyzes four key research variables collected from animal subjects:
+
+- **Age** — age of the animal at study enrollment (weeks)
+- **Sex** — biological sex of the animal (M / F)
+- **Weeks at euthanasia** — age in weeks when the animal was euthanized
+- **Reached terminal** — whether the animal reached the terminal endpoint (tumor growth)
+
+---
+
+## 1. Load Libraries and Data
+
+```{r load}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(scales)
+
+# Load data — replace the path below with your actual data file
+data <- read.csv("data/sample_data.csv", stringsAsFactors = FALSE)
+
+# Ensure correct types
+data$sex             <- factor(data$sex, levels = c("M", "F"), labels = c("Male", "Female"))
+data$reached_terminal <- factor(data$reached_terminal, levels = c("Yes", "No"))
+
+kable(head(data), caption = "First rows of the dataset")
+```
+
+---
+
+## 2. Age at Enrollment
+
+```{r age-summary}
+cat("Summary of Age (weeks):\n")
+summary(data$age_weeks)
+```
+
+```{r age-plot}
+ggplot(data, aes(x = factor(age_weeks))) +
+  geom_bar(fill = "steelblue", color = "white") +
+  labs(
+    title = "Distribution of Age at Enrollment",
+    x     = "Age (weeks)",
+    y     = "Count"
+  ) +
+  theme_minimal()
+```
+
+---
+
+## 3. Sex
+
+```{r sex-summary}
+sex_table <- table(data$sex)
+kable(as.data.frame(sex_table), col.names = c("Sex", "Count"),
+      caption = "Animal counts by sex")
+```
+
+```{r sex-plot}
+ggplot(data, aes(x = sex, fill = sex)) +
+  geom_bar(show.legend = FALSE) +
+  scale_fill_manual(values = c("Male" = "#4E79A7", "Female" = "#F28E2B")) +
+  labs(
+    title = "Sex Distribution",
+    x     = "Sex",
+    y     = "Count"
+  ) +
+  theme_minimal()
+```
+
+---
+
+## 4. Weeks at Euthanasia
+
+```{r euthanasia-summary}
+cat("Summary of Weeks at Euthanasia:\n")
+summary(data$weeks_at_euthanasia)
+```
+
+```{r euthanasia-plot}
+ggplot(data, aes(x = weeks_at_euthanasia, fill = sex)) +
+  geom_histogram(binwidth = 2, color = "white", position = "dodge") +
+  scale_fill_manual(values = c("Male" = "#4E79A7", "Female" = "#F28E2B")) +
+  labs(
+    title = "Distribution of Age at Euthanasia by Sex",
+    x     = "Weeks at Euthanasia",
+    y     = "Count",
+    fill  = "Sex"
+  ) +
+  theme_minimal()
+```
+
+```{r euthanasia-boxplot}
+ggplot(data, aes(x = sex, y = weeks_at_euthanasia, fill = sex)) +
+  geom_boxplot(show.legend = FALSE, outlier.shape = 21) +
+  scale_fill_manual(values = c("Male" = "#4E79A7", "Female" = "#F28E2B")) +
+  labs(
+    title = "Age at Euthanasia by Sex",
+    x     = "Sex",
+    y     = "Weeks at Euthanasia"
+  ) +
+  theme_minimal()
+```
+
+---
+
+## 5. Terminal Endpoint (Tumor Growth)
+
+```{r terminal-summary}
+terminal_table <- table(data$reached_terminal)
+terminal_pct   <- prop.table(terminal_table) * 100
+
+kable(
+  data.frame(
+    Reached_Terminal = names(terminal_table),
+    Count            = as.integer(terminal_table),
+    Percent          = round(as.numeric(terminal_pct), 1)
+  ),
+  caption = "Terminal endpoint counts and percentages"
+)
+```
+
+```{r terminal-plot}
+ggplot(data, aes(x = reached_terminal, fill = reached_terminal)) +
+  geom_bar(show.legend = FALSE) +
+  scale_fill_manual(values = c("Yes" = "#E15759", "No" = "#76B7B2")) +
+  labs(
+    title = "Animals Reaching Terminal Endpoint",
+    x     = "Reached Terminal (Tumor Growth)",
+    y     = "Count"
+  ) +
+  theme_minimal()
+```
+
+---
+
+## 6. Cross-tabulations
+
+### Terminal endpoint by sex
+
+```{r crosstab-sex-terminal}
+ct <- table(Sex = data$sex, Terminal = data$reached_terminal)
+kable(ct, caption = "Terminal endpoint by sex")
+```
+
+```{r crosstab-sex-terminal-plot}
+ggplot(data, aes(x = sex, fill = reached_terminal)) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values = c("Yes" = "#E15759", "No" = "#76B7B2")) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    title = "Proportion Reaching Terminal Endpoint by Sex",
+    x     = "Sex",
+    y     = "Proportion",
+    fill  = "Reached Terminal"
+  ) +
+  theme_minimal()
+```
+
+### Weeks at euthanasia by terminal endpoint
+
+```{r euthanasia-by-terminal}
+data %>%
+  group_by(reached_terminal) %>%
+  summarise(
+    n        = n(),
+    mean_wks = round(mean(weeks_at_euthanasia), 1),
+    sd_wks   = round(sd(weeks_at_euthanasia), 1),
+    min_wks  = min(weeks_at_euthanasia),
+    max_wks  = max(weeks_at_euthanasia)
+  ) %>%
+  kable(
+    col.names = c("Reached Terminal", "N", "Mean Weeks", "SD", "Min", "Max"),
+    caption   = "Weeks at euthanasia by terminal endpoint"
+  )
+```
+
+```{r euthanasia-terminal-boxplot}
+ggplot(data, aes(x = reached_terminal, y = weeks_at_euthanasia, fill = reached_terminal)) +
+  geom_boxplot(show.legend = FALSE, outlier.shape = 21) +
+  scale_fill_manual(values = c("Yes" = "#E15759", "No" = "#76B7B2")) +
+  labs(
+    title = "Weeks at Euthanasia by Terminal Endpoint",
+    x     = "Reached Terminal",
+    y     = "Weeks at Euthanasia"
+  ) +
+  theme_minimal()
+```
+
+---
+
+## 7. Statistical Tests
+
+### Difference in weeks at euthanasia: terminal vs. non-terminal
+
+```{r t-test}
+t_result <- t.test(weeks_at_euthanasia ~ reached_terminal, data = data)
+cat(sprintf(
+  "Welch two-sample t-test\n  t = %.3f, df = %.1f, p-value = %.4f\n",
+  t_result$statistic, t_result$parameter, t_result$p.value
+))
+```
+
+### Association between sex and terminal endpoint
+
+```{r chi-sq}
+chi_result <- chisq.test(table(data$sex, data$reached_terminal))
+cat(sprintf(
+  "Chi-squared test\n  X² = %.3f, df = %d, p-value = %.4f\n",
+  chi_result$statistic, chi_result$parameter, chi_result$p.value
+))
+```
+
+---
+
+## 8. Session Info
+
+```{r session-info}
+sessionInfo()
+```
