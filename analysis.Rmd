@@ -47,7 +47,6 @@ data <- raw_data %>%
     )
   ) %>%
   mutate(
-    age_weeks = weeks_at_euthanasia,
     sex = factor(sex, levels = c("M", "F"), labels = c("Male", "Female")),
     reached_terminal = factor(reached_terminal, levels = c("Yes", "No"))
   )
@@ -61,11 +60,11 @@ kable(head(data), caption = "First rows of the dataset")
 
 ```{r age-summary}
 cat("Summary of Tiempo (sem):\n")
-summary(data$age_weeks)
+summary(data$weeks_at_euthanasia)
 ```
 
 ```{r age-plot}
-ggplot(data, aes(x = factor(age_weeks))) +
+ggplot(data, aes(x = factor(weeks_at_euthanasia))) +
   geom_bar(fill = "steelblue", color = "white") +
   labs(
     title = "Distribution of Tiempo (sem)",

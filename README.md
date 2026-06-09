@@ -26,6 +26,7 @@ data/sample_data.csv  # Optional template dataset
    install.packages(c("ggplot2", "dplyr", "tidyr", "knitr", "scales", "rmarkdown"))
    ```
 3. **Use the dataset** `R Raw Data.csv` with the columns shown above, or edit the `read.csv()` path in `analysis.Rmd` to point to your file.
+   - Keep the file in the repository root (same folder as `analysis.Rmd`) unless you also update the path in the script.
 4. **Knit the report**: open `analysis.Rmd` in RStudio and click **Knit**, or run from the R console:
    ```r
    rmarkdown::render("analysis.Rmd")
