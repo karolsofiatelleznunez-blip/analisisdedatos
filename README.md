@@ -25,7 +25,7 @@ data/sample_data.csv  # Optional template dataset
    ```r
    install.packages(c("ggplot2", "dplyr", "tidyr", "knitr", "scales", "rmarkdown"))
    ```
-3. **Use the dataset** `R Raw Data.csv` with the columns shown above, or edit the `read.csv()` path in `analysis.Rmd` to point to your file.
+3. **Use the dataset** `R Raw Data.csv` with the columns shown above, or edit the `data_file <-` value in `analysis.Rmd` to point to your file.
    - Keep the file in the repository root (same folder as `analysis.Rmd`) unless you also update the path in the script.
 4. **Knit the report**: open `analysis.Rmd` in RStudio and click **Knit**, or run from the R console:
    ```r
@@ -35,9 +35,9 @@ data/sample_data.csv  # Optional template dataset
 
 ## Analysis sections
 
-1. Age at enrollment — distribution summary and bar chart
+1. Tiempo (sem) — distribution summary and bar chart
 2. Sex — counts and bar chart
-3. Weeks at euthanasia — summary, histogram by sex, and box plot
+3. Tiempo (sem) by sex — summary, histogram by sex, and box plot
 4. Terminal endpoint — counts, percentages, and bar chart
 5. Cross-tabulations — terminal endpoint by sex; weeks at euthanasia by terminal endpoint
 6. Statistical tests — Welch *t*-test and chi-squared test

@@ -38,11 +38,18 @@ data_file <- "R Raw Data.csv"
 if (!file.exists(data_file)) {
   stop(sprintf("Data file not found: %s", data_file))
 }
-# skip = 1 because this CSV contains an initial extra row (",,") before headers
+# skip = 1 because this CSV currently includes an initial extra row (",,") before headers.
+# If that row is removed in future exports, set skip = 0.
 raw_data <- read.csv(data_file, stringsAsFactors = FALSE, skip = 1, check.names = FALSE)
+expected_columns <- c("Tiempo (sem)", "¿Llegó a término?", "Sexo")
+missing_columns <- setdiff(expected_columns, names(raw_data))
+if (length(missing_columns) > 0) {
+  stop(sprintf("Missing expected column(s): %s", paste(missing_columns, collapse = ", ")))
+}
 
 data <- raw_data %>%
   transmute(
+    # Convert decimal comma format (e.g., "11,0") to standard decimal notation.
     tiempo_sem = as.numeric(sub(",", ".", `Tiempo (sem)`, fixed = TRUE)),
     reached_terminal = case_when(
       trimws(as.character(`¿Llegó a término?`)) == "1" ~ "Yes",
