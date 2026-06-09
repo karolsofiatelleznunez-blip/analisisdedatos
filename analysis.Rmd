@@ -222,8 +222,8 @@ data %>%
     n        = n(),
     mean_wks = round(mean(tiempo_sem, na.rm = TRUE), 1),
     sd_wks   = round(sd(tiempo_sem, na.rm = TRUE), 1),
-    min_wks  = min(tiempo_sem, na.rm = TRUE),
-    max_wks  = max(tiempo_sem, na.rm = TRUE)
+    min_wks  = if (all(is.na(tiempo_sem))) NA_real_ else min(tiempo_sem, na.rm = TRUE),
+    max_wks  = if (all(is.na(tiempo_sem))) NA_real_ else max(tiempo_sem, na.rm = TRUE)
   ) %>%
   kable(
     col.names = c("Reached Terminal", "N", "Mean Weeks", "SD", "Min", "Max"),
@@ -251,11 +251,17 @@ ggplot(data, aes(x = reached_terminal, y = tiempo_sem, fill = reached_terminal))
 
 ```{r t-test}
 test_data <- data %>% filter(!is.na(tiempo_sem), !is.na(reached_terminal))
-t_result <- t.test(tiempo_sem ~ reached_terminal, data = test_data)
-cat(sprintf(
-  "Welch two-sample t-test\n  t = %.3f, df = %.1f, p-value = %.4f\n",
-  t_result$statistic, t_result$parameter, t_result$p.value
-))
+group_counts <- table(test_data$reached_terminal)
+
+if (length(group_counts) < 2 || any(group_counts < 2)) {
+  cat("Not enough non-missing data in both terminal groups to run Welch two-sample t-test.\n")
+} else {
+  t_result <- t.test(tiempo_sem ~ reached_terminal, data = test_data)
+  cat(sprintf(
+    "Welch two-sample t-test\n  t = %.3f, df = %.1f, p-value = %.4f\n",
+    t_result$statistic, t_result$parameter, t_result$p.value
+  ))
+}
 ```
 
 ### Association between sex and terminal endpoint
