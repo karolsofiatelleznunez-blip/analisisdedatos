@@ -35,6 +35,10 @@ library(scales)
 
 # Load and normalize CSV columns
 data_file <- "R Raw Data.csv"
+if (!file.exists(data_file)) {
+  stop(sprintf("Data file not found: %s", data_file))
+}
+# skip = 1 because this CSV contains an initial extra row (",,") before headers
 raw_data <- read.csv(data_file, stringsAsFactors = FALSE, skip = 1, check.names = FALSE)
 
 data <- raw_data %>%
@@ -52,9 +56,11 @@ data <- raw_data %>%
     reached_terminal = factor(reached_terminal, levels = c("Yes", "No"))
   )
 
-invalid_tiempo_rows <- which(is.na(data$tiempo_sem) & nzchar(trimws(as.character(raw_data$`Tiempo (sem)`))))
+tiempo_raw <- trimws(as.character(raw_data$`Tiempo (sem)`))
+has_unparseable_tiempo <- is.na(data$tiempo_sem) & nzchar(tiempo_raw)
+invalid_tiempo_rows <- which(has_unparseable_tiempo)
 if (length(invalid_tiempo_rows) > 0) {
-  invalid_values <- unique(as.character(raw_data$`Tiempo (sem)`[invalid_tiempo_rows]))
+  invalid_values <- unique(tiempo_raw[invalid_tiempo_rows])
   warning(sprintf(
     "Some `Tiempo (sem)` values could not be parsed (rows: %s; values: %s).",
     paste(invalid_tiempo_rows, collapse = ", "),
