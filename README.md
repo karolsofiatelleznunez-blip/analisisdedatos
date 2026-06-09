@@ -2,20 +2,20 @@
 
 R analysis of research variables collected from animal subjects in tumor-growth studies.
 
-## Variables
+## Variables (from `R Raw Data.csv`)
 
 | Variable | Description |
 |---|---|
-| `age_weeks` | Age of the animal at study enrollment (weeks) |
-| `sex` | Biological sex — `M` (Male) or `F` (Female) |
-| `weeks_at_euthanasia` | Age in weeks when the animal was euthanized |
-| `reached_terminal` | Whether the animal reached the terminal endpoint due to tumor growth — `Yes` or `No` |
+| `Tiempo (sem)` | Time in weeks (decimal comma format) |
+| `¿Llegó a término?` | Terminal endpoint indicator (`1` = Yes, `0` = No) |
+| `Sexo` | Sex category (`Macho` or `Hembra`) |
 
 ## Files
 
 ```
 analysis.Rmd          # Main R Markdown analysis (open in RStudio and knit)
-data/sample_data.csv  # Template dataset — replace with your real data
+R Raw Data.csv        # Main dataset used by analysis.Rmd
+data/sample_data.csv  # Optional template dataset
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ data/sample_data.csv  # Template dataset — replace with your real data
    ```r
    install.packages(c("ggplot2", "dplyr", "tidyr", "knitr", "scales", "rmarkdown"))
    ```
-3. **Add your data** to `data/` as a CSV file with the columns shown above, or edit the `read.csv()` path in `analysis.Rmd` to point to your file.
+3. **Use the dataset** `R Raw Data.csv` with the columns shown above, or edit the `read.csv()` path in `analysis.Rmd` to point to your file.
 4. **Knit the report**: open `analysis.Rmd` in RStudio and click **Knit**, or run from the R console:
    ```r
    rmarkdown::render("analysis.Rmd")

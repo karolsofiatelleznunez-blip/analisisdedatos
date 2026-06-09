@@ -16,12 +16,11 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 ## Overview
 
-This document analyzes four key research variables collected from animal subjects:
+This document analyzes the variables available in `R Raw Data.csv`:
 
-- **Age** — age of the animal at study enrollment (weeks)
-- **Sex** — biological sex of the animal (M / F)
-- **Weeks at euthanasia** — age in weeks when the animal was euthanized
-- **Reached terminal** — whether the animal reached the terminal endpoint (tumor growth)
+- **Tiempo (sem)** — time in weeks
+- **¿Llegó a término?** — terminal endpoint indicator (`1` = Yes, `0` = No)
+- **Sexo** — sex category (`Macho` / `Hembra`)
 
 ---
 
@@ -34,22 +33,34 @@ library(tidyr)
 library(knitr)
 library(scales)
 
-# Load data — replace the path below with your actual data file
-data <- read.csv("data/sample_data.csv", stringsAsFactors = FALSE)
+# Load and normalize CSV columns
+raw_data <- read.csv("R Raw Data.csv", stringsAsFactors = FALSE, skip = 1, check.names = FALSE)
 
-# Ensure correct types
-data$sex             <- factor(data$sex, levels = c("M", "F"), labels = c("Male", "Female"))
-data$reached_terminal <- factor(data$reached_terminal, levels = c("Yes", "No"))
+data <- raw_data %>%
+  transmute(
+    weeks_at_euthanasia = as.numeric(sub(",", ".", `Tiempo (sem)`, fixed = TRUE)),
+    reached_terminal = ifelse(trimws(as.character(`¿Llegó a término?`)) == "1", "Yes", "No"),
+    sex = case_when(
+      tolower(trimws(Sexo)) == "macho"  ~ "M",
+      tolower(trimws(Sexo)) == "hembra" ~ "F",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  mutate(
+    age_weeks = weeks_at_euthanasia,
+    sex = factor(sex, levels = c("M", "F"), labels = c("Male", "Female")),
+    reached_terminal = factor(reached_terminal, levels = c("Yes", "No"))
+  )
 
 kable(head(data), caption = "First rows of the dataset")
 ```
 
 ---
 
-## 2. Age at Enrollment
+## 2. Tiempo (sem)
 
 ```{r age-summary}
-cat("Summary of Age (weeks):\n")
+cat("Summary of Tiempo (sem):\n")
 summary(data$age_weeks)
 ```
 
@@ -57,8 +68,8 @@ summary(data$age_weeks)
 ggplot(data, aes(x = factor(age_weeks))) +
   geom_bar(fill = "steelblue", color = "white") +
   labs(
-    title = "Distribution of Age at Enrollment",
-    x     = "Age (weeks)",
+    title = "Distribution of Tiempo (sem)",
+    x     = "Tiempo (sem)",
     y     = "Count"
   ) +
   theme_minimal()
