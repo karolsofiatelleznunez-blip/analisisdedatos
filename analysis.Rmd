@@ -31,6 +31,7 @@ library(ggplot2)
 library(dplyr)
 library(knitr)
 library(scales)
+library(survival)
 
 # Load and clean the raw dataset
 data <- read.csv(
@@ -228,7 +229,62 @@ cat(sprintf(
 
 ---
 
-## 7. Session Info
+## 7. Survival Analysis
+
+Animals that did not reach the terminal endpoint are treated as **right-censored** at their week of euthanasia. This section fits Kaplan-Meier survival curves and compares time-to-terminal-endpoint between sexes using the log-rank test.
+
+```{r survival-setup}
+# Encode event: 1 = reached terminal (event occurred), 0 = censored
+surv_obj <- Surv(
+  time  = data$weeks_at_euthanasia,
+  event = as.integer(data$reached_terminal == "Yes")
+)
+```
+
+### Kaplan-Meier curves by sex
+
+```{r km-fit}
+km_fit <- survfit(surv_obj ~ sex, data = data)
+summary(km_fit)
+```
+
+```{r km-plot}
+plot(
+  km_fit,
+  col     = c("#4E79A7", "#F28E2B"),
+  lwd     = 2,
+  xlab    = "Weeks at Euthanasia",
+  ylab    = "Survival Probability",
+  main    = "Kaplan-Meier Survival Curves by Sex",
+  mark.time = TRUE
+)
+legend(
+  "topright",
+  legend = c("Male", "Female"),
+  col    = c("#4E79A7", "#F28E2B"),
+  lwd    = 2,
+  bty    = "n"
+)
+```
+
+### Log-rank test: sex comparison
+
+The log-rank test assesses whether the time-to-terminal-endpoint distributions differ between males and females.
+
+```{r log-rank}
+lr_result <- survdiff(surv_obj ~ sex, data = data)
+lr_pvalue <- lr_result$pvalue
+cat(sprintf(
+  "Log-rank test\n  Chi-squared = %.3f, df = %d, p-value = %.4f\n",
+  lr_result$chisq,
+  length(lr_result$n) - 1,
+  lr_pvalue
+))
+```
+
+---
+
+## 8. Session Info
 
 ```{r session-info}
 sessionInfo()

@@ -22,7 +22,7 @@ R Raw Data.csv # Source dataset used by the report
 1. **Install R and RStudio** if you have not already.
 2. **Install required R packages** (run once in the R console):
    ```r
-   install.packages(c("ggplot2", "dplyr", "knitr", "scales", "rmarkdown"))
+   install.packages(c("ggplot2", "dplyr", "knitr", "scales", "rmarkdown", "survival"))
    ```
 3. **Keep your data** in `R Raw Data.csv` with these source columns:
    - `Tiempo (sem)`
@@ -36,11 +36,12 @@ R Raw Data.csv # Source dataset used by the report
 
 ## Analysis sections
 
-1. Sex — counts and bar chart
-2. Weeks at euthanasia — summary, histogram by sex, and box plot
-3. Terminal endpoint — counts, percentages, and bar chart
-4. Cross-tabulations — terminal endpoint by sex; weeks at euthanasia by terminal endpoint
-5. Statistical tests — Welch *t*-test and chi-squared test
+2. Sex — counts and bar chart
+3. Weeks at euthanasia — summary, histogram by sex, and box plot
+4. Terminal endpoint — counts, percentages, and bar chart
+5. Cross-tabulations — terminal endpoint by sex; weeks at euthanasia by terminal endpoint
+6. Statistical tests — Welch *t*-test and chi-squared test
+7. Survival analysis — Kaplan-Meier curves by sex and log-rank test (time-to-terminal-endpoint)
 
 ## Dataset
 
