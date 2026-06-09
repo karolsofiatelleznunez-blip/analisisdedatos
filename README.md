@@ -6,7 +6,6 @@ R analysis of research variables collected from animal subjects in tumor-growth 
 
 | Variable | Description |
 |---|---|
-| `age_weeks` | Age of the animal at study enrollment (weeks) |
 | `sex` | Biological sex — `M` (Male) or `F` (Female) |
 | `weeks_at_euthanasia` | Age in weeks when the animal was euthanized |
 | `reached_terminal` | Whether the animal reached the terminal endpoint due to tumor growth — `Yes` or `No` |
@@ -34,12 +33,11 @@ data/sample_data.csv  # Template dataset — replace with your real data
 
 ## Analysis sections
 
-1. Age at enrollment — distribution summary and bar chart
-2. Sex — counts and bar chart
-3. Weeks at euthanasia — summary, histogram by sex, and box plot
-4. Terminal endpoint — counts, percentages, and bar chart
-5. Cross-tabulations — terminal endpoint by sex; weeks at euthanasia by terminal endpoint
-6. Statistical tests — Welch *t*-test and chi-squared test
+1. Sex — counts and bar chart
+2. Weeks at euthanasia — summary, histogram by sex, and box plot
+3. Terminal endpoint — counts, percentages, and bar chart
+4. Cross-tabulations — terminal endpoint by sex; weeks at euthanasia by terminal endpoint
+5. Statistical tests — Welch *t*-test and chi-squared test
 ## Dataset
 
 This repository includes the dataset `R Raw Data.csv`.
@@ -48,8 +46,8 @@ This repository includes the dataset `R Raw Data.csv`.
 - `R Raw Data.csv`
 
 ### Columns
-- `Tiempo (sem)`: time in weeks
-- `¿Llegó a término?`: term outcome indicator
+- `Tiempo (sem)`: Weeks at euthanasia
+- `¿Llegó a término?`: Term outcome indicator: 1= yes, 0=no 
 - `Sexo`: sex category (`Macho` or `Hembra`)
 
 ### Notes
