@@ -16,9 +16,8 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 
 ## Overview
 
-This document analyzes four key research variables collected from animal subjects:
+This document analyzes three key research variables collected from animal subjects:
 
-- **Age** — age of the animal at study enrollment (weeks)
 - **Sex** — biological sex of the animal (M / F)
 - **Weeks at euthanasia** — age in weeks when the animal was euthanized
 - **Reached terminal** — whether the animal reached the terminal endpoint (tumor growth)
@@ -30,48 +29,46 @@ This document analyzes four key research variables collected from animal subject
 ```{r load}
 library(ggplot2)
 library(dplyr)
-library(tidyr)
 library(knitr)
 library(scales)
 
-# Load data — replace the path below with your actual data file
-data <- read.csv("data/sample_data.csv", stringsAsFactors = FALSE)
+# Load and clean the raw dataset
+data <- read.csv(
+  "R Raw Data.csv",
+  skip = 1,
+  stringsAsFactors = FALSE,
+  check.names = FALSE
+)
 
-# Ensure correct types
-data$sex             <- factor(data$sex, levels = c("M", "F"), labels = c("Male", "Female"))
-data$reached_terminal <- factor(data$reached_terminal, levels = c("Yes", "No"))
+names(data) <- c("weeks_at_euthanasia", "reached_terminal", "sex")
+
+data <- data %>%
+  mutate(
+    weeks_at_euthanasia = as.numeric(gsub(",", ".", weeks_at_euthanasia)),
+    reached_terminal = factor(
+      ifelse(reached_terminal == 1, "Yes", "No"),
+      levels = c("Yes", "No")
+    ),
+    sex = factor(
+      ifelse(sex == "Macho", "Male", "Female"),
+      levels = c("Male", "Female")
+    )
+  )
 
 kable(head(data), caption = "First rows of the dataset")
 ```
 
 ---
 
-## 2. Age at Enrollment
-
-```{r age-summary}
-cat("Summary of Age (weeks):\n")
-summary(data$age_weeks)
-```
-
-```{r age-plot}
-ggplot(data, aes(x = factor(age_weeks))) +
-  geom_bar(fill = "steelblue", color = "white") +
-  labs(
-    title = "Distribution of Age at Enrollment",
-    x     = "Age (weeks)",
-    y     = "Count"
-  ) +
-  theme_minimal()
-```
-
----
-
-## 3. Sex
+## 2. Sex
 
 ```{r sex-summary}
 sex_table <- table(data$sex)
-kable(as.data.frame(sex_table), col.names = c("Sex", "Count"),
-      caption = "Animal counts by sex")
+kable(
+  as.data.frame(sex_table),
+  col.names = c("Sex", "Count"),
+  caption = "Animal counts by sex"
+)
 ```
 
 ```{r sex-plot}
@@ -88,7 +85,7 @@ ggplot(data, aes(x = sex, fill = sex)) +
 
 ---
 
-## 4. Weeks at Euthanasia
+## 3. Weeks at Euthanasia
 
 ```{r euthanasia-summary}
 cat("Summary of Weeks at Euthanasia:\n")
@@ -122,7 +119,7 @@ ggplot(data, aes(x = sex, y = weeks_at_euthanasia, fill = sex)) +
 
 ---
 
-## 5. Terminal Endpoint (Tumor Growth)
+## 4. Terminal Endpoint (Tumor Growth)
 
 ```{r terminal-summary}
 terminal_table <- table(data$reached_terminal)
@@ -152,7 +149,7 @@ ggplot(data, aes(x = reached_terminal, fill = reached_terminal)) +
 
 ---
 
-## 6. Cross-tabulations
+## 5. Cross-tabulations
 
 ### Terminal endpoint by sex
 
@@ -182,10 +179,10 @@ data %>%
   group_by(reached_terminal) %>%
   summarise(
     n        = n(),
-    mean_wks = round(mean(weeks_at_euthanasia), 1),
-    sd_wks   = round(sd(weeks_at_euthanasia), 1),
-    min_wks  = min(weeks_at_euthanasia),
-    max_wks  = max(weeks_at_euthanasia)
+    mean_wks = round(mean(weeks_at_euthanasia, na.rm = TRUE), 1),
+    sd_wks   = round(sd(weeks_at_euthanasia, na.rm = TRUE), 1),
+    min_wks  = min(weeks_at_euthanasia, na.rm = TRUE),
+    max_wks  = max(weeks_at_euthanasia, na.rm = TRUE)
   ) %>%
   kable(
     col.names = c("Reached Terminal", "N", "Mean Weeks", "SD", "Min", "Max"),
@@ -207,7 +204,7 @@ ggplot(data, aes(x = reached_terminal, y = weeks_at_euthanasia, fill = reached_t
 
 ---
 
-## 7. Statistical Tests
+## 6. Statistical Tests
 
 ### Difference in weeks at euthanasia: terminal vs. non-terminal
 
@@ -231,7 +228,7 @@ cat(sprintf(
 
 ---
 
-## 8. Session Info
+## 7. Session Info
 
 ```{r session-info}
 sessionInfo()
