@@ -43,8 +43,12 @@ raw_data <- read.csv(data_file, stringsAsFactors = FALSE, skip = 1, check.names 
 
 data <- raw_data %>%
   transmute(
-    tiempo_sem = suppressWarnings(as.numeric(sub(",", ".", `Tiempo (sem)`, fixed = TRUE))),
-    reached_terminal = ifelse(trimws(as.character(`¿Llegó a término?`)) == "1", "Yes", "No"),
+    tiempo_sem = as.numeric(sub(",", ".", `Tiempo (sem)`, fixed = TRUE)),
+    reached_terminal = case_when(
+      trimws(as.character(`¿Llegó a término?`)) == "1" ~ "Yes",
+      trimws(as.character(`¿Llegó a término?`)) == "0" ~ "No",
+      TRUE ~ NA_character_
+    ),
     sex = case_when(
       tolower(trimws(Sexo)) == "macho"  ~ "M",
       tolower(trimws(Sexo)) == "hembra" ~ "F",
@@ -209,10 +213,10 @@ data %>%
   group_by(reached_terminal) %>%
   summarise(
     n        = n(),
-    mean_wks = round(mean(tiempo_sem), 1),
-    sd_wks   = round(sd(tiempo_sem), 1),
-    min_wks  = min(tiempo_sem),
-    max_wks  = max(tiempo_sem)
+    mean_wks = round(mean(tiempo_sem, na.rm = TRUE), 1),
+    sd_wks   = round(sd(tiempo_sem, na.rm = TRUE), 1),
+    min_wks  = min(tiempo_sem, na.rm = TRUE),
+    max_wks  = max(tiempo_sem, na.rm = TRUE)
   ) %>%
   kable(
     col.names = c("Reached Terminal", "N", "Mean Weeks", "SD", "Min", "Max"),
@@ -239,7 +243,8 @@ ggplot(data, aes(x = reached_terminal, y = tiempo_sem, fill = reached_terminal))
 ### Difference in tiempo (sem): terminal vs. non-terminal
 
 ```{r t-test}
-t_result <- t.test(tiempo_sem ~ reached_terminal, data = data)
+test_data <- data %>% filter(!is.na(tiempo_sem), !is.na(reached_terminal))
+t_result <- t.test(tiempo_sem ~ reached_terminal, data = test_data)
 cat(sprintf(
   "Welch two-sample t-test\n  t = %.3f, df = %.1f, p-value = %.4f\n",
   t_result$statistic, t_result$parameter, t_result$p.value
