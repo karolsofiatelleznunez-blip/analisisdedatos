@@ -27,6 +27,7 @@ data/sample_data.csv  # Optional template dataset
    ```
 3. **Use the dataset** `R Raw Data.csv` with the columns shown above, or edit the `data_file <-` value in `analysis.Rmd` to point to your file.
    - Keep the file in the repository root (same folder as `analysis.Rmd`) unless you also update the path in the script.
+   - Keep column names exactly as `Tiempo (sem)`, `¿Llegó a término?`, and `Sexo` (including spaces and punctuation), or update the script mappings accordingly.
 4. **Knit the report**: open `analysis.Rmd` in RStudio and click **Knit**, or run from the R console:
    ```r
    rmarkdown::render("analysis.Rmd")

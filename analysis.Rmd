@@ -254,7 +254,12 @@ test_data <- data %>% filter(!is.na(tiempo_sem), !is.na(reached_terminal))
 group_counts <- table(test_data$reached_terminal)
 
 if (length(group_counts) < 2 || any(group_counts < 2)) {
-  cat("Not enough non-missing data in both terminal groups to run Welch two-sample t-test.\n")
+  yes_n <- if ("Yes" %in% names(group_counts)) as.integer(group_counts[["Yes"]]) else 0L
+  no_n  <- if ("No" %in% names(group_counts)) as.integer(group_counts[["No"]]) else 0L
+  cat(sprintf(
+    "Not enough non-missing data to run Welch two-sample t-test (Yes: n=%d, No: n=%d; need at least 2 per group).\n",
+    yes_n, no_n
+  ))
 } else {
   t_result <- t.test(tiempo_sem ~ reached_terminal, data = test_data)
   cat(sprintf(
